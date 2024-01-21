@@ -1,5 +1,7 @@
+import Drawing from "@/pages/Drawing";
+
 const App = () => {
-  return <div className="underline">App!</div>;
+  return <Drawing />;
 };
 
 export default App;
