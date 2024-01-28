@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from "react";
-import { PR_SHARE_RENDER_HELPER } from "@/types/FUNCTIONS";
 import Button from "@/components/ui/Button";
+import { PR_SHARE_RENDER_HELPER } from "@/types/FUNCTIONS";
+import { STR_SHAPE } from "@/types/STRUCTURES";
 
 const Drawing = () => {
   const drawingElementRef = useRef<HTMLDivElement>(null);
   const [shapeList, setShapeList] = useState<STR_SHAPE[] | []>([]);
-  const currentShape = useRef<any | null>(null);
-  const shapeLists = useRef<any[] | []>([]);
+  const currentShape = useRef<STR_SHAPE | null>(null);
+  const shapeLists = useRef<STR_SHAPE[] | []>([]);
   const shapeRenderFlag = useRef(true);
   const shapeRenderType = useRef<PR_SHARE_RENDER_HELPER | null>(null);
 
@@ -59,7 +60,7 @@ const Drawing = () => {
   const handleMouseDown = (e: MouseEvent) => {
     const { offsetX, offsetY } = e;
     setShapeList((prev) => {
-      const temp = {
+      const temp: STR_SHAPE = {
         left: offsetX,
         top: offsetY,
         width: 6,
@@ -108,7 +109,7 @@ const Drawing = () => {
           className="border border-solid border-[#333] w-full h-full relative z-[10]"
           ref={drawingElementRef}
         >
-          {shapeList.map((shape, idx) => {
+          {shapeList.map((shape: STR_SHAPE, idx) => {
             return (
               <div className="absolute left-0 top-0 w-full h-full">
                 <div
