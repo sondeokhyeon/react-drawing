@@ -3,9 +3,11 @@ import Button from "@/components/ui/Button";
 
 const Drawing = () => {
   const drawingElementRef = useRef<HTMLDivElement>(null);
-  const [shapeList, setShapeList] = useState<any[] | []>([]);
+  const [shapeList, setShapeList] = useState<STR_SHAPE[] | []>([]);
   const currentShape = useRef<any | null>(null);
   const shapeLists = useRef<any[] | []>([]);
+  const shapeRenderFlag = useRef(true);
+  const shapeRenderType = useRef<any | null>(null);
 
   const handleMouseMove = (e: MouseEvent) => {
     const { offsetX, offsetY } = e;
@@ -17,8 +19,20 @@ const Drawing = () => {
     const width = offsetX - a?.left;
     const height = offsetY - a?.top;
 
-    a.width = width;
-    a.height = height;
+    if (width < 0) {
+      a.translateX = width;
+    } else {
+      a.translateX = 0;
+    }
+
+    if (height < 0) {
+      a.translateY = height;
+    } else {
+      a.translateY = 0;
+    }
+
+    a.width = Math.abs(width);
+    a.height = Math.abs(height);
 
     setShapeList(
       shapeLists.current.map((s) => {
@@ -93,6 +107,10 @@ const Drawing = () => {
                     top: shape?.top ?? 0,
                     width: shape?.width ?? 0,
                     height: shape?.height ?? 0,
+                    borderRadius: `${shape?.radius ?? 0}%`,
+                    transform: `translate(${shape?.translateX ?? 0}px,${
+                      shape?.translateY ?? 0
+                    }px)`,
                   }}
                 />
               </div>
