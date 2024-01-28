@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { PR_SHARE_RENDER_HELPER } from "@/types/FUNCTIONS";
 import Button from "@/components/ui/Button";
 
 const Drawing = () => {
@@ -7,7 +8,7 @@ const Drawing = () => {
   const currentShape = useRef<any | null>(null);
   const shapeLists = useRef<any[] | []>([]);
   const shapeRenderFlag = useRef(true);
-  const shapeRenderType = useRef<any | null>(null);
+  const shapeRenderType = useRef<PR_SHARE_RENDER_HELPER | null>(null);
 
   const handleMouseMove = (e: MouseEvent) => {
     const { offsetX, offsetY } = e;
@@ -31,6 +32,8 @@ const Drawing = () => {
       a.translateY = 0;
     }
 
+    if (shapeRenderType.current === PR_SHARE_RENDER_HELPER.CIRCLE)
+      a.radius = 50;
     a.width = Math.abs(width);
     a.height = Math.abs(height);
 
@@ -61,6 +64,8 @@ const Drawing = () => {
         top: offsetY,
         width: 6,
         height: 6,
+        radius:
+          shapeRenderType.current === PR_SHARE_RENDER_HELPER.CIRCLE ? 50 : 0,
         index: prev.length,
         translateX: 0,
         translateY: 0,
@@ -78,17 +83,25 @@ const Drawing = () => {
     shapeLists.current = shapeList;
   }, [shapeList]);
 
-  const shareRenderHelper = () => {
-    if (!drawingElementRef.current) return;
+  const shareRenderHelper = (shareType: PR_SHARE_RENDER_HELPER) => {
+    shapeRenderType.current = shareType;
+    if (!drawingElementRef.current || shapeRenderFlag.current === false) return;
     drawingElementRef.current?.addEventListener("mousedown", handleMouseDown);
+    shapeRenderFlag.current = false;
   };
 
   return (
     <div className="flex justify-center items-center h-full w-full flex-col">
       <div className="w-[700px] h-[500px]">
         <div className="flex gap-x-[10px] items-start w-full">
-          <Button title="Box" onClick={() => shareRenderHelper()} />
-          <Button title="Circle" onClick={() => shareRenderHelper()} />
+          <Button
+            title="Box"
+            onClick={() => shareRenderHelper(PR_SHARE_RENDER_HELPER.BOX)}
+          />
+          <Button
+            title="Circle"
+            onClick={() => shareRenderHelper(PR_SHARE_RENDER_HELPER.CIRCLE)}
+          />
           <Button title="Clear" onClick={handleClear} />
         </div>
         <div
