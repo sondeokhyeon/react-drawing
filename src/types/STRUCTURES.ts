@@ -1,5 +1,5 @@
 /* 해당 파일은 프로젝트에서 사용하는 오브젝트들 정의한다 */
-/* 접두사는 STR로 한다 */ 
+/* 접두사는 STR로 한다 */
 
 /** 도형 타입  */
 export interface STR_SHAPE {
@@ -19,4 +19,6 @@ export interface STR_SHAPE {
   translateY: number;
   /** 원형 랜더링용 CSS값 */
   radius: number;
+  /** 하이라이트용 배경값 */
+  backgroundColor: string;
 }
