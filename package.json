@@ -12,6 +12,8 @@
   "dependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "recoil": "^0.7.7",
+    "recoil-persist": "^5.1.0",
     "vite-tsconfig-paths": "^4.3.1"
   },
   "devDependencies": {
