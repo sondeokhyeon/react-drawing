@@ -4,6 +4,8 @@ import { STR_SHAPE } from "@/types/STRUCTURES";
 import { useResetRecoilState, useRecoilState } from "recoil";
 import { shapeAtomSelector } from "@/atoms/drawing";
 import Button from "@/components/ui/Button";
+import ShapeContainer from "@/components/container/ShapeContainer";
+import ShapeControlContainer from "@/components/container/ShapeControlContainer";
 
 const Drawing = () => {
   const drawingElementRef = useRef<HTMLDivElement>(null);
@@ -89,6 +91,7 @@ const Drawing = () => {
         index: prev.length,
         translateX: 0,
         translateY: 0,
+        backgroundColor: "",
       };
       currentShape.current = newShape;
       return [...prev, newShape];
@@ -118,7 +121,7 @@ const Drawing = () => {
 
   return (
     <div className="flex justify-center items-center h-full w-full flex-col">
-      <div className="w-[700px] h-[500px]">
+      <div className="w-[950px] h-auto">
         <div className="flex gap-x-[10px] items-start w-full">
           <Button
             title="Box"
@@ -130,30 +133,14 @@ const Drawing = () => {
           />
           <Button title="Clear" onClick={handleClear} />
         </div>
-        <div
-          className="border border-solid border-[#333] w-full h-full relative "
-          ref={drawingElementRef}
-        >
-          <div className="absolute left-0 top-0 w-full h-full z-[10]" />
-          {shapeList.map((shape: STR_SHAPE, idx) => {
-            return (
-              <div
-                key={idx}
-                className="absolute border border-solid border-[#333]"
-                data-index={shape.index}
-                style={{
-                  left: shape?.left ?? 0,
-                  top: shape?.top ?? 0,
-                  width: shape?.width ?? 0,
-                  height: shape?.height ?? 0,
-                  borderRadius: `${shape?.radius ?? 0}%`,
-                  transform: `translate(${shape?.translateX ?? 0}px,${
-                    shape?.translateY ?? 0
-                  }px)`,
-                }}
-              />
-            );
-          })}
+        <div className="flex justify-between ">
+          <div
+            className="border border-solid border-[#333] w-[700px] h-[500px] relative "
+            ref={drawingElementRef}
+          >
+            <ShapeContainer />
+          </div>
+          <ShapeControlContainer />
         </div>
       </div>
     </div>
