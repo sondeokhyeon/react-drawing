@@ -1,8 +1,9 @@
-import { useEffect, useRef, useState } from "react";
-import Button from "@/components/ui/Button";
+import { useEffect, useRef } from "react";
 import { PR_SHARE_RENDER_HELPER } from "@/types/FUNCTIONS";
 import { STR_SHAPE } from "@/types/STRUCTURES";
-import useLocalStroage from "@/hooks/useLocalStorage";
+import { useResetRecoilState, useRecoilState } from "recoil";
+import { shapeAtomSelector } from "@/atoms/drawing";
+import Button from "@/components/ui/Button";
 
 const Drawing = () => {
   const drawingElementRef = useRef<HTMLDivElement>(null);
@@ -12,40 +13,52 @@ const Drawing = () => {
 
   const isShapeButtonEnableFlag = useRef(true);
   const shapeRenderType = useRef<PR_SHARE_RENDER_HELPER | null>(null);
-  const { data, setData, clearData } = useLocalStroage("shape", []);
-  const [shapeList, setShapeList] = useState<STR_SHAPE[] | []>(data);
+
+  const [shapeList, setShapeList] = useRecoilState<STR_SHAPE[] | []>(
+    shapeAtomSelector,
+  );
+
+  /* RecoilState를 초기값으로 바꾼다 */
+  const handleClear = useResetRecoilState(shapeAtomSelector);
 
   const handleMouseMove = (e: MouseEvent) => {
     const { offsetX, offsetY } = e;
-    /* 이벤트 타겟이 이상하게 튀는 경우가 있어 해당 현상을 방지하고자 추가 */
-    if ((e.target as HTMLDivElement).getAttribute("data-type")) return;
 
     const shape = currentShape.current;
     if (!shape) return;
-    const width = offsetX - shape?.left;
-    const height = offsetY - shape?.top;
+
+    const width = offsetX - shape.left;
+    const height = offsetY - shape.top;
+    let translateX = 0;
+    let translateY = 0;
+    let radius = 0;
 
     if (width < 0) {
-      shape.translateX = width;
+      translateX = width;
     } else {
-      shape.translateX = 0;
+      translateX = 0;
     }
 
     if (height < 0) {
-      shape.translateY = height;
+      translateY = height;
     } else {
-      shape.translateY = 0;
+      translateY = 0;
     }
 
-    if (shapeRenderType.current === PR_SHARE_RENDER_HELPER.CIRCLE)
-      shape.radius = width / 50;
+    if (shapeRenderType.current === PR_SHARE_RENDER_HELPER.CIRCLE) radius = 50;
 
-    shape.width = Math.abs(width);
-    shape.height = Math.abs(height);
+    const resizedShape = {
+      ...shape,
+      translateY: translateY,
+      translateX: translateX,
+      radius: radius,
+      width: Math.abs(width),
+      height: Math.abs(height),
+    };
 
     setShapeList(
       shapeLists.current.map((s) => {
-        if (s.index === shape.index) return shape;
+        if (s.index === resizedShape.index) return resizedShape;
         return s;
       }),
     );
@@ -66,7 +79,7 @@ const Drawing = () => {
     const { offsetX, offsetY } = e;
 
     setShapeList((prev) => {
-      const temp: STR_SHAPE = {
+      const newShape: STR_SHAPE = {
         left: offsetX,
         top: offsetY,
         width: 6,
@@ -77,27 +90,28 @@ const Drawing = () => {
         translateX: 0,
         translateY: 0,
       };
-      currentShape.current = temp;
-      setData([...prev, temp]);
-      return [...prev, temp];
+      currentShape.current = newShape;
+      return [...prev, newShape];
     });
+
     drawingElementRef.current?.addEventListener("mousemove", handleMouseMove);
     drawingElementRef.current?.addEventListener("mouseup", handleMouseUp);
   };
 
-  const handleClear = () => {
-    clearData();
-    setShapeList([]);
-  };
-
   useEffect(() => {
+    /* 상태값 업데이트 이후 최신 state를 가져올 수 없으므로 useRef에 담는다  */
     shapeLists.current = shapeList;
   }, [shapeList]);
 
-  const shareRenderHelper = (shareType: PR_SHARE_RENDER_HELPER) => {
+  const handleShapeButton = (shareType: PR_SHARE_RENDER_HELPER) => {
+    /* 최신값을 사용해야 하므로 useRef에 값을 담는다 */
     shapeRenderType.current = shareType;
-    if (!drawingElementRef.current || isShapeButtonEnableFlag.current === false)
+    if (
+      !drawingElementRef.current ||
+      isShapeButtonEnableFlag.current === false
+    ) {
       return;
+    }
     drawingElementRef.current?.addEventListener("mousedown", handleMouseDown);
     isShapeButtonEnableFlag.current = false;
   };
@@ -108,37 +122,36 @@ const Drawing = () => {
         <div className="flex gap-x-[10px] items-start w-full">
           <Button
             title="Box"
-            onClick={() => shareRenderHelper(PR_SHARE_RENDER_HELPER.BOX)}
+            onClick={() => handleShapeButton(PR_SHARE_RENDER_HELPER.BOX)}
           />
           <Button
             title="Circle"
-            onClick={() => shareRenderHelper(PR_SHARE_RENDER_HELPER.CIRCLE)}
+            onClick={() => handleShapeButton(PR_SHARE_RENDER_HELPER.CIRCLE)}
           />
           <Button title="Clear" onClick={handleClear} />
         </div>
         <div
-          className="border border-solid border-[#333] w-full h-full relative z-[10]"
+          className="border border-solid border-[#333] w-full h-full relative "
           ref={drawingElementRef}
         >
+          <div className="absolute left-0 top-0 w-full h-full z-[10]" />
           {shapeList.map((shape: STR_SHAPE, idx) => {
             return (
-              <div className="absolute left-0 top-0 w-full h-full">
-                <div
-                  key={idx}
-                  className="absolute border border-solid border-[#333]"
-                  data-type="shape"
-                  style={{
-                    left: shape?.left ?? 0,
-                    top: shape?.top ?? 0,
-                    width: shape?.width ?? 0,
-                    height: shape?.height ?? 0,
-                    borderRadius: `${shape?.radius ?? 0}%`,
-                    transform: `translate(${shape?.translateX ?? 0}px,${
-                      shape?.translateY ?? 0
-                    }px)`,
-                  }}
-                />
-              </div>
+              <div
+                key={idx}
+                className="absolute border border-solid border-[#333]"
+                data-index={shape.index}
+                style={{
+                  left: shape?.left ?? 0,
+                  top: shape?.top ?? 0,
+                  width: shape?.width ?? 0,
+                  height: shape?.height ?? 0,
+                  borderRadius: `${shape?.radius ?? 0}%`,
+                  transform: `translate(${shape?.translateX ?? 0}px,${
+                    shape?.translateY ?? 0
+                  }px)`,
+                }}
+              />
             );
           })}
         </div>
