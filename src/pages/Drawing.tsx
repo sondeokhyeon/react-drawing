@@ -2,45 +2,50 @@ import { useEffect, useRef, useState } from "react";
 import Button from "@/components/ui/Button";
 import { PR_SHARE_RENDER_HELPER } from "@/types/FUNCTIONS";
 import { STR_SHAPE } from "@/types/STRUCTURES";
+import useLocalStroage from "@/hooks/useLocalStorage";
 
 const Drawing = () => {
   const drawingElementRef = useRef<HTMLDivElement>(null);
-  const [shapeList, setShapeList] = useState<STR_SHAPE[] | []>([]);
+
   const currentShape = useRef<STR_SHAPE | null>(null);
   const shapeLists = useRef<STR_SHAPE[] | []>([]);
-  const shapeRenderFlag = useRef(true);
+
+  const isShapeButtonEnableFlag = useRef(true);
   const shapeRenderType = useRef<PR_SHARE_RENDER_HELPER | null>(null);
+  const { data, setData, clearData } = useLocalStroage("shape", []);
+  const [shapeList, setShapeList] = useState<STR_SHAPE[] | []>(data);
 
   const handleMouseMove = (e: MouseEvent) => {
     const { offsetX, offsetY } = e;
-
+    /* 이벤트 타겟이 이상하게 튀는 경우가 있어 해당 현상을 방지하고자 추가 */
     if ((e.target as HTMLDivElement).getAttribute("data-type")) return;
 
-    const a = currentShape.current;
-    if (!a) return;
-    const width = offsetX - a?.left;
-    const height = offsetY - a?.top;
+    const shape = currentShape.current;
+    if (!shape) return;
+    const width = offsetX - shape?.left;
+    const height = offsetY - shape?.top;
 
     if (width < 0) {
-      a.translateX = width;
+      shape.translateX = width;
     } else {
-      a.translateX = 0;
+      shape.translateX = 0;
     }
 
     if (height < 0) {
-      a.translateY = height;
+      shape.translateY = height;
     } else {
-      a.translateY = 0;
+      shape.translateY = 0;
     }
 
     if (shapeRenderType.current === PR_SHARE_RENDER_HELPER.CIRCLE)
-      a.radius = 50;
-    a.width = Math.abs(width);
-    a.height = Math.abs(height);
+      shape.radius = width / 50;
+
+    shape.width = Math.abs(width);
+    shape.height = Math.abs(height);
 
     setShapeList(
       shapeLists.current.map((s) => {
-        if (s.index === a.index) return a;
+        if (s.index === shape.index) return shape;
         return s;
       }),
     );
@@ -59,6 +64,7 @@ const Drawing = () => {
 
   const handleMouseDown = (e: MouseEvent) => {
     const { offsetX, offsetY } = e;
+
     setShapeList((prev) => {
       const temp: STR_SHAPE = {
         left: offsetX,
@@ -72,13 +78,17 @@ const Drawing = () => {
         translateY: 0,
       };
       currentShape.current = temp;
+      setData([...prev, temp]);
       return [...prev, temp];
     });
     drawingElementRef.current?.addEventListener("mousemove", handleMouseMove);
     drawingElementRef.current?.addEventListener("mouseup", handleMouseUp);
   };
 
-  const handleClear = () => setShapeList([]);
+  const handleClear = () => {
+    clearData();
+    setShapeList([]);
+  };
 
   useEffect(() => {
     shapeLists.current = shapeList;
@@ -86,9 +96,10 @@ const Drawing = () => {
 
   const shareRenderHelper = (shareType: PR_SHARE_RENDER_HELPER) => {
     shapeRenderType.current = shareType;
-    if (!drawingElementRef.current || shapeRenderFlag.current === false) return;
+    if (!drawingElementRef.current || isShapeButtonEnableFlag.current === false)
+      return;
     drawingElementRef.current?.addEventListener("mousedown", handleMouseDown);
-    shapeRenderFlag.current = false;
+    isShapeButtonEnableFlag.current = false;
   };
 
   return (
