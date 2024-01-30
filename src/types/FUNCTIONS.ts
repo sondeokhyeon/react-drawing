@@ -8,7 +8,7 @@
  * BOX - 박스
  * CIRCLE - 원형
  * */
-export const enum PR_SHARE_RENDER_HELPER {
+export const enum PR_SHAPE_TYPE {
   BOX = "box",
   CIRCLE = "circle",
 }

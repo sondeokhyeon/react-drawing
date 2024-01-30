@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { PR_SHARE_RENDER_HELPER } from "@/types/FUNCTIONS";
+import { PR_SHAPE_TYPE } from "@/types/FUNCTIONS";
 import { STR_SHAPE } from "@/types/STRUCTURES";
 import { useResetRecoilState, useRecoilState } from "recoil";
 import { shapeAtomSelector } from "@/atoms/drawing";
@@ -14,7 +14,7 @@ const Drawing = () => {
   const shapeLists = useRef<STR_SHAPE[] | []>([]);
 
   const isShapeButtonEnableFlag = useRef(true);
-  const shapeRenderType = useRef<PR_SHARE_RENDER_HELPER | null>(null);
+  const shapeButtonType = useRef<PR_SHAPE_TYPE | null>(null);
 
   const [shapeList, setShapeList] = useRecoilState<STR_SHAPE[] | []>(
     shapeAtomSelector,
@@ -47,7 +47,7 @@ const Drawing = () => {
       translateY = 0;
     }
 
-    if (shapeRenderType.current === PR_SHARE_RENDER_HELPER.CIRCLE) radius = 50;
+    if (shapeButtonType.current === PR_SHAPE_TYPE.CIRCLE) radius = 50;
 
     const resizedShape = {
       ...shape,
@@ -86,8 +86,7 @@ const Drawing = () => {
         top: offsetY,
         width: 6,
         height: 6,
-        radius:
-          shapeRenderType.current === PR_SHARE_RENDER_HELPER.CIRCLE ? 50 : 0,
+        radius: shapeButtonType.current === PR_SHAPE_TYPE.CIRCLE ? 50 : 0,
         index: prev.length,
         translateX: 0,
         translateY: 0,
@@ -106,9 +105,9 @@ const Drawing = () => {
     shapeLists.current = shapeList;
   }, [shapeList]);
 
-  const handleShapeButton = (shareType: PR_SHARE_RENDER_HELPER) => {
+  const handleShapeButton = (shapeType: PR_SHAPE_TYPE) => {
     /* 최신값을 사용해야 하므로 useRef에 값을 담는다 */
-    shapeRenderType.current = shareType;
+    shapeButtonType.current = shapeType;
     if (
       !drawingElementRef.current ||
       isShapeButtonEnableFlag.current === false
@@ -125,11 +124,11 @@ const Drawing = () => {
         <div className="flex gap-x-[10px] items-start w-full">
           <Button
             title="Box"
-            onClick={() => handleShapeButton(PR_SHARE_RENDER_HELPER.BOX)}
+            onClick={() => handleShapeButton(PR_SHAPE_TYPE.BOX)}
           />
           <Button
             title="Circle"
-            onClick={() => handleShapeButton(PR_SHARE_RENDER_HELPER.CIRCLE)}
+            onClick={() => handleShapeButton(PR_SHAPE_TYPE.CIRCLE)}
           />
           <Button title="Clear" onClick={handleClear} />
         </div>
