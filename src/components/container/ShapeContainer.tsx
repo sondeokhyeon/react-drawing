@@ -3,6 +3,7 @@ import { STR_SHAPE } from "@/types/STRUCTURES";
 import { Fragment } from "react";
 import { useRecoilValue } from "recoil";
 
+/** 도형 Container  */
 const ShapeContainer = () => {
   const shapeList = useRecoilValue(shapeAtomSelector);
   return (
@@ -19,6 +20,7 @@ const ShapeContainer = () => {
   );
 };
 
+/** 도형 */
 const Shape = ({ shape }: { shape: STR_SHAPE }) => {
   return (
     <div

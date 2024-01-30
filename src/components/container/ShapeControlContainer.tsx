@@ -3,6 +3,7 @@ import { shapeAtomSelector } from "@/atoms/drawing";
 import { STR_SHAPE } from "@/types/STRUCTURES";
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 
+/* 도형 조절(개별 삭제, 순서변경) container */
 const ShapeControlContainer = () => {
   const [subMenuSelect, setSubMenuSelect] = useState<number | null>(null);
   const [shapeList, setShapeList] = useRecoilState<STR_SHAPE[] | []>(

@@ -7,6 +7,7 @@ const { persistAtom } = recoilPersist();
 const shapeAtom = atom<STR_SHAPE[] | []>({
   key: "shapeAtom",
   default: [],
+  /* localstorage연동을 위해 persist를 활용한다 */
   effects_UNSTABLE: [persistAtom],
 });
 

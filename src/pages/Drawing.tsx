@@ -8,14 +8,17 @@ import ShapeContainer from "@/components/container/ShapeContainer";
 import ShapeControlContainer from "@/components/container/ShapeControlContainer";
 
 const Drawing = () => {
+  /* 도형 랜더링 영역 Ref  */
   const drawingElementRef = useRef<HTMLDivElement>(null);
-
+  /* 현재수정중인 도형 */
   const currentShape = useRef<STR_SHAPE | null>(null);
+  /** state 업데이트 이후 최신 도형리스트 */
   const shapeLists = useRef<STR_SHAPE[] | []>([]);
-
+  /** 도형버튼타입 */
   const isShapeButtonEnableFlag = useRef(true);
+  /** 도형버튼타입 */
   const shapeButtonType = useRef<PR_SHAPE_TYPE | null>(null);
-
+  /* 도형리스트  */
   const [shapeList, setShapeList] = useRecoilState<STR_SHAPE[] | []>(
     shapeAtomSelector,
   );
@@ -35,6 +38,7 @@ const Drawing = () => {
     let translateY = 0;
     let radius = 0;
 
+    /* 도형이 양수가 되면 translateX의 값이 0이 되어야하므로 초기화 해준다 */
     if (width < 0) {
       translateX = width;
     } else {
@@ -102,6 +106,7 @@ const Drawing = () => {
 
   useEffect(() => {
     /* 상태값 업데이트 이후 최신 state를 가져올 수 없으므로 useRef에 담는다  */
+    /* 다른 브랜치로 해당 로직을 개선하려고 했으나 못하였습니다.  */
     shapeLists.current = shapeList;
   }, [shapeList]);
 
@@ -115,6 +120,7 @@ const Drawing = () => {
       return;
     }
     drawingElementRef.current?.addEventListener("mousedown", handleMouseDown);
+    /* mousedown addEventListener 한번만 등록을 위해 조건을 추가한다  */
     isShapeButtonEnableFlag.current = false;
   };
 
