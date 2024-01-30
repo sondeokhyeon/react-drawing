@@ -21,4 +21,6 @@ export interface STR_SHAPE {
   radius: number;
   /** 하이라이트용 배경값 */
   backgroundColor: string;
+  status: number;
+  flag: boolean;
 }

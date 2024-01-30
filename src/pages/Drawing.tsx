@@ -92,6 +92,8 @@ const Drawing = () => {
         translateX: 0,
         translateY: 0,
         backgroundColor: "",
+        status: 0,
+        flag: false,
       };
       currentShape.current = newShape;
       return [...prev, newShape];
@@ -103,6 +105,7 @@ const Drawing = () => {
 
   useEffect(() => {
     /* 상태값 업데이트 이후 최신 state를 가져올 수 없으므로 useRef에 담는다  */
+    /* useRef를 담아서 관리하는 로직을 개선하려고 시도중 */
     shapeLists.current = shapeList;
   }, [shapeList]);
 
