@@ -1,14 +1,12 @@
 import { useRecoilState } from "recoil";
-import { shapeAtomSelector } from "@/atoms/drawing";
+import { shapeAtom } from "@/atoms/drawing";
 import { STR_SHAPE } from "@/types/STRUCTURES";
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 
 /* 도형 조절(개별 삭제, 순서변경) container */
 const ShapeControlContainer = () => {
-  const [subMenuSelect, setSubMenuSelect] = useState<number | null>(null);
-  const [shapeList, setShapeList] = useRecoilState<STR_SHAPE[] | []>(
-    shapeAtomSelector,
-  );
+  const [subMenuSelect, setSubMenuSelect] = useState<string | null>(null);
+  const [shapeList, setShapeList] = useRecoilState<STR_SHAPE[] | []>(shapeAtom);
 
   const handleMouseOver = (shape: STR_SHAPE) => {
     const shapeWithBackgroundColor = {
@@ -29,24 +27,24 @@ const ShapeControlContainer = () => {
     setShapeList(highlightRemoveList);
   };
 
-  const handleButtonClick = (i: number) => setSubMenuSelect(i);
+  const handleButtonClick = (key: string) => setSubMenuSelect(key);
 
   return (
     <div className="w-[200px] h-[500px] border border-solid border-[#333] overflow-scroll ">
       {shapeList.map((e, i) => {
         return (
-          <div key={i} className="relative">
+          <div key={e.key} className="relative">
             <button
               onMouseOver={() => {
                 handleMouseOver(e);
               }}
               onMouseOut={handleMouseOut}
-              onClick={() => handleButtonClick(i)}
+              onClick={() => handleButtonClick(e.key)}
               className="h-[50px] w-full border-b border-solid border-[#333] text-center flex justify-center items-center cursor-pointer"
             >
               {i}
             </button>
-            {subMenuSelect === i && (
+            {subMenuSelect === e.key && (
               <SubMenu shape={e} setSubMenuSelect={setSubMenuSelect} />
             )}
           </div>
@@ -61,13 +59,10 @@ const SubMenu = ({
   setSubMenuSelect,
 }: {
   shape: STR_SHAPE;
-  setSubMenuSelect: Dispatch<SetStateAction<number | null>>;
+  setSubMenuSelect: Dispatch<SetStateAction<string | null>>;
 }) => {
   const subMenuRef = useRef<HTMLDivElement>(null);
-
-  const [shapeList, setShapeList] = useRecoilState<STR_SHAPE[] | []>(
-    shapeAtomSelector,
-  );
+  const [shapeList, setShapeList] = useRecoilState<STR_SHAPE[] | []>(shapeAtom);
 
   useEffect(() => {
     document.addEventListener("mousedown", handleMenuClose);
@@ -85,11 +80,10 @@ const SubMenu = ({
     }
   };
 
-  const reOrderList = () => {
-    return shapeList.filter((s) => {
+  const reOrderList = () =>
+    shapeList.filter((s) => {
       return s.index !== shape.index;
     });
-  };
 
   const handleRemoveShape = () => {
     setShapeList(reOrderList());

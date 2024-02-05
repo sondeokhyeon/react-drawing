@@ -1,17 +1,17 @@
-import { shapeAtomSelector } from "@/atoms/drawing";
+import { shapeAtom } from "@/atoms/drawing";
 import { STR_SHAPE } from "@/types/STRUCTURES";
 import { Fragment } from "react";
 import { useRecoilValue } from "recoil";
 
 /** 도형 Container  */
 const ShapeContainer = () => {
-  const shapeList = useRecoilValue(shapeAtomSelector);
+  const shapeList = useRecoilValue(shapeAtom);
   return (
     <>
       <div className="absolute left-0 top-0 w-full h-full z-[10]" />
-      {shapeList.map((shape: STR_SHAPE, idx) => {
+      {shapeList.map((shape: STR_SHAPE) => {
         return (
-          <Fragment key={idx}>
+          <Fragment key={shape.key}>
             <Shape shape={shape} />
           </Fragment>
         );

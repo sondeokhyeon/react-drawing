@@ -1,8 +1,9 @@
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import { PR_SHAPE_TYPE } from "@/types/FUNCTIONS";
 import { STR_SHAPE } from "@/types/STRUCTURES";
-import { useResetRecoilState, useRecoilState } from "recoil";
-import { shapeAtomSelector } from "@/atoms/drawing";
+import { useResetRecoilState, useSetRecoilState } from "recoil";
+import { shapeAtom } from "@/atoms/drawing";
+import { v4 as uid } from "uuid";
 import Button from "@/components/ui/Button";
 import ShapeContainer from "@/components/container/ShapeContainer";
 import ShapeControlContainer from "@/components/container/ShapeControlContainer";
@@ -13,18 +14,15 @@ const Drawing = () => {
   /* 현재수정중인 도형 */
   const currentShape = useRef<STR_SHAPE | null>(null);
   /** state 업데이트 이후 최신 도형리스트 */
-  const shapeLists = useRef<STR_SHAPE[] | []>([]);
   /** 도형버튼타입 */
   const isShapeButtonEnableFlag = useRef(true);
   /** 도형버튼타입 */
   const shapeButtonType = useRef<PR_SHAPE_TYPE | null>(null);
   /* 도형리스트  */
-  const [shapeList, setShapeList] = useRecoilState<STR_SHAPE[] | []>(
-    shapeAtomSelector,
-  );
+  const setShapeList = useSetRecoilState(shapeAtom);
 
   /* RecoilState를 초기값으로 바꾼다 */
-  const handleClear = useResetRecoilState(shapeAtomSelector);
+  const handleClear = useResetRecoilState(shapeAtom);
 
   const handleMouseMove = (e: MouseEvent) => {
     const { offsetX, offsetY } = e;
@@ -62,8 +60,8 @@ const Drawing = () => {
       height: Math.abs(height),
     };
 
-    setShapeList(
-      shapeLists.current.map((s) => {
+    setShapeList((prev) =>
+      prev.map((s) => {
         if (s.index === resizedShape.index) return resizedShape;
         return s;
       }),
@@ -94,6 +92,7 @@ const Drawing = () => {
         index: prev.length,
         translateX: 0,
         translateY: 0,
+        key: uid(),
         backgroundColor: "",
       };
       currentShape.current = newShape;
@@ -103,12 +102,6 @@ const Drawing = () => {
     drawingElementRef.current?.addEventListener("mousemove", handleMouseMove);
     drawingElementRef.current?.addEventListener("mouseup", handleMouseUp);
   };
-
-  useEffect(() => {
-    /* 상태값 업데이트 이후 최신 state를 가져올 수 없으므로 useRef에 담는다  */
-    /* 다른 브랜치로 해당 로직을 개선하려고 했으나 못하였습니다.  */
-    shapeLists.current = shapeList;
-  }, [shapeList]);
 
   const handleShapeButton = (shapeType: PR_SHAPE_TYPE) => {
     /* 최신값을 사용해야 하므로 useRef에 값을 담는다 */
